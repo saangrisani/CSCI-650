@@ -1,116 +1,59 @@
-# Node-RED + vader
+# vader
 
-Course repository: https://github.com/saangrisani/CSCI-650
+I'm building a local AI companion named **vader** and connecting it to my home automation setup through Node-RED. I want something I can talk to, learn with, and keep improving over time without paying for API usage credits.
 
-Node-RED is the selected application for the repository-selection assignment. **vader** is a local AI companion experiment that can chat, remember useful facts, inspect a supplied flow, and look up information online. Its personality is editable in `vader/personality.txt`.
+Most of my programming experience is in C and C++. I've also worked with JavaScript and Node.js, so this gives me a reason to use those skills on something I'll actually use at home.
+
+## My setup
+
+My Windows laptop is where I'm developing and testing the project. It has an RTX 4060 Laptop GPU with 8 GB of VRAM and about 15 GB of usable system RAM. The current local model is `qwen2.5:3b`, running through Ollama.
+
+I can use vader through a desktop chat app or the command line. My plan is to make the Jetson the always-on host so my laptop stays available for schoolwork. I still need to check the Jetson's exact hardware and software before moving the runtime there.
+
+The home systems I want to start with are Eufy cameras, Alexa speakers, and my Tesla. Those integrations aren't connected yet.
+
+## Running it locally
+
+From this repository folder, with Ollama running locally:
+
+```sh
+# Desktop app from source
+pnpm vader:app
+
+# Command-line chat
+node vader/cli.mjs --chat
+
+# Node-RED
+pnpm start
+
+# Tests
+pnpm test
+```
+
+The portable Windows app launches with `Vader.exe`. I need to keep its whole application folder together. Node-RED normally opens at http://127.0.0.1:1889; the separate test instance used port 1892.
+
+For a fresh checkout, I use `pnpm install --frozen-lockfile`. If Electron's binary is missing, I run `node node_modules/electron/install.js`. The local model needs to be downloaded separately with `ollama pull qwen2.5:3b`.
+
+## What I want vader to learn
+
+I want vader to remember useful details and preferences so conversations can carry over. That memory is stored locally. I can also review and correct answers in the desktop app's Learning studio and export approved examples for a future training run.
+
+Memory and retraining are different parts of the project. The optional LoRA/QLoRA scripts create a separate candidate model adapter; I haven't completed a full training run or tested an imported trained model yet.
+
+## Moving it and keeping my information private
+
+I can export an encrypted companion file from Settings and restore it on another machine. That carries the memories, conversations, settings, personality, and approved examples. The model and runtime files move separately. A restored copy starts with internet lookup off.
+
+My conversations and memories stay out of this repository. Inference runs locally, but internet lookup sends search terms or requested URLs to outside websites. For private conversations, I turn lookup off or use `--offline` in the CLI.
 
 ## Course work
 
-- [Project 1 write-up](project-1/selection.md)
-- [Ranked URLs for text entry](project-1/submission.txt)
-- [Candidate test evidence](docs/candidate-evaluation.md)
-- [Scope and current limitations](docs/PROJECT.md)
-- [Verification record](docs/VERIFICATION.md)
+I'm using [Node-RED](https://github.com/node-red/node-red) as my first-choice application for Projects 1–3. I want the class work to focus on testing and improving the design of existing code, with the home setup giving me a practical reason to understand it.
 
-The course repo is not an upstream Node-RED fork. The semester's testing/design changes need a real fork of https://github.com/node-red/node-red. Configuring flows or building vader alone does not replace that requirement. The full Projects 1–3 rubrics have not been supplied.
+This repository holds my project notes, local setup, and vader code. I still need a separate upstream Node-RED fork for the application changes. Building the companion and configuring flows are additional work, rather than the source refactoring required for class.
 
-## Local prerequisites
-
-- Node.js 22 or newer; tested with 24.19.0.
-- pnpm 11 (lockfile supplied), or npm for installation without the pnpm lockfile.
-- Ollama from https://ollama.com/download for AI conversations.
-- A downloaded local model; default is `qwen2.5:3b` (approximately 1.9 GB download). Actual speed depends on RAM/GPU. Review the model's upstream license.
-
-## Two ways to use vader
-
-**Windows desktop:** a native Electron chat window with conversation sidebar, memories, model settings, and a Learning studio. From source, run `pnpm vader:app` after installing dependencies. If pnpm skips Electron's binary download, run `node node_modules/electron/install.js` once. Build a portable Windows folder with `pnpm vader:build`; launch `Vader.exe` inside the resulting `.runtime/build/Vader` directory. Keep that entire folder together. The portable build includes Electron; Ollama and its local model are separate prerequisites. It is a local development build, not a signed installer.
-
-**Command line on Windows or Jetson/Linux:** `node vader/cli.mjs --chat`. On a headless machine use `pnpm install --prod --frozen-lockfile` to omit Electron. Jetson GPU/runtime compatibility remains to be checked on the actual hardware.
-
-Desktop source runs share `.runtime/vader/memory.json` with the CLI. A portable app uses its per-user app data folder; its memories are separate until deliberately copied or synchronized. Each interface currently has its own conversation history. No automatic cross-computer synchronization is implemented.
-
-The desktop app can start a local Ollama executable through Settings. If Ollama is already running, it uses that server; ensure you started it with cloud disabled. After a fresh install, download the model with `ollama pull qwen2.5:3b`. The desktop app does not automatically download models.
-
-### Retraining
-
-The desktop Learning studio lets you review/correct answers and export approved examples. Optional Python LoRA/QLoRA scripts can train a separate candidate adapter locally, evaluate held-out loss, and merge it for a separately checked import. See [the retraining workflow](docs/RETRAINING.md). This is real parameter-training code, but no full training run or trained candidate import has been verified yet. Ordinary chat uses memory/context and does not silently retrain or switch models.
-
-```sh
-pnpm install --frozen-lockfile
-pnpm test
-pnpm start
-```
-
-Open http://127.0.0.1:1889. A fresh instance starts with an empty workspace. Import `examples/course-evaluation.json` using the editor's Import menu and deploy it. Request http://127.0.0.1:1889/course-eval?value=21 to check the expected result `{"result":42}`. Stop any earlier test instance using this port first, or set `NODE_RED_PORT` to another port.
-
-With npm: `npm install`, `npm test`, `npm start`. Prefer pnpm for the checked-in dependency lock.
-
-## Run vader with no paid API credits
-
-Run Ollama in local-only mode. If the desktop Ollama application is already running, quit it before starting this separate server. Keep the terminal open.
-
-PowerShell:
-
-```powershell
-$env:OLLAMA_NO_CLOUD='1'
-$env:OLLAMA_HOST='127.0.0.1:11434'
-ollama serve
-```
-
-Linux/macOS:
-
-```sh
-OLLAMA_NO_CLOUD=1 OLLAMA_HOST=127.0.0.1:11434 ollama serve
-```
-
-In another terminal:
-
-```sh
-ollama pull qwen2.5:3b
-node vader/cli.mjs --chat
-```
-
-On Windows, `powershell -ExecutionPolicy Bypass -File scripts/start-vader.ps1` starts a local server if needed and opens the chat. This policy override applies only to that PowerShell process. A portable Ollama executable can be supplied using `-OllamaPath`.
-
-Or use one question:
-
-```sh
-node vader/cli.mjs "Hi vader, let's get to know each other."
-node vader/cli.mjs --flow examples/course-evaluation.json "Inspect this flow and suggest regression tests."
-node vader/cli.mjs "Read https://nodered.org/about/ and explain what Node-RED does."
-```
-
-The model runs locally through Ollama. There are no API keys, paid inference calls, or automatic cloud fallback. Downloads and optional internet tools use your internet connection; local compute consumes electricity. A cloud model is not a substitute for the required downloaded model.
-
-### Memory and learning
-
-```sh
-node vader/cli.mjs --remember "My strongest languages are C and C++."
-node vader/cli.mjs --memories
-node vader/cli.mjs --forget MEMORY_ID
-node vader/cli.mjs --offline "Let's talk without internet tools."
-```
-
-vader can save facts through its memory tool. `--chat` also keeps recent conversation turns across restarts. Memory and conversation files stay under ignored `.runtime/vader/`. Edit these files to correct or remove stored information. Recent memories and conversation turns are supplied as context; this is retrieval/context-based learning, not automatic training or modification of model weights. Only the latest 30 memories and 12 conversation messages are included in an individual request.
-
-Internet tools can search Wikipedia and read public HTTPS text pages. This is not a full browser or general search-engine crawler. Web requests disclose the requested URL/search to the destination; the model's conversation is not sent to a hosted model. Web content may be wrong or outdated. Read requests do not reach local/private network devices. Use `--offline` to disable these tools.
-
-The initial tools do not execute shell commands, edit application code, deploy flows, or control physical devices. These capabilities can be designed separately when there is a specific household task. This is an implementation scope, not a claim that learning requires permanent personality restrictions.
-
-### Connect Node-RED to vader
-
-Keep Ollama running, then start `node vader/server.mjs --flow examples/course-evaluation.json`. In Node-RED, import and deploy `examples/vader-review.json`. Send a JSON POST to `http://127.0.0.1:1889/vader` with a body such as `{"prompt":"Inspect the supplied flow and explain it."}`. The flow calls vader's local API on port 1891 and returns its answer. The API only accepts a prompt; the reviewed flow is chosen when the server starts. Both services bind to the local computer. HTTP questions are independent; use CLI chat for ongoing conversation history.
-
-For deterministic flow inspection without any model:
-
-```sh
-node vader/cli.mjs --inspect --flow examples/course-evaluation.json
-```
-
-## Local data and repository hygiene
-
-For encrypted transfer between machines and a precise account of internet disclosure, see [portability and privacy](docs/PORTABILITY-PRIVACY.md). The desktop Settings page can export/restore the companion; CLI supports `--data-dir` or `VADER_DATA_DIR`. Transferred model weights and runtimes remain separate.
-
-Keep credentials, real device identifiers, recordings, flows containing private configuration, model weights, and personal memories out of Git. `.runtime/`, `.env*`, `models/`, and `node_modules/` are ignored. Review a flow export before sharing it. The supplied examples use no device accounts.
-
-The Jetson remains the intended future always-on host; the laptop is a development/test client. Jetson hardware, software compatibility, deployment, and household integrations remain unverified.
+- [Project 1 selection](project-1/selection.md)
+- [Ranked repository URLs](project-1/submission.txt)
+- [Test and verification notes](docs/VERIFICATION.md)
+- [Local retraining workflow](docs/RETRAINING.md)
+- [Moving vader and privacy details](docs/PORTABILITY-PRIVACY.md)
