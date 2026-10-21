@@ -1,7 +1,7 @@
 import { parseArgs } from 'node:util';
 import { loadFlowSummary, runVader } from './agent.mjs';
 import { readMemories, remember, forget } from './memory.mjs';
-import { resolve } from 'node:path';
+import { resolve, join } from 'node:path';
 import { createInterface } from 'node:readline/promises';
 import { stdin, stdout } from 'node:process';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
@@ -9,9 +9,15 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 try {
     const { values, positionals } = parseArgs({
         allowPositionals: true,
-        options: { flow: { type: 'string' }, model: { type: 'string' }, inspect: { type: 'boolean' }, help: { type: 'boolean' }, remember: { type: 'string' }, memories: { type: 'boolean' }, forget: { type: 'string' }, offline: { type: 'boolean' }, chat: { type: 'boolean' } }
+        options: { 'data-dir': { type: 'string' }, flow: { type: 'string' }, model: { type: 'string' }, inspect: { type: 'boolean' }, help: { type: 'boolean' }, remember: { type: 'string' }, memories: { type: 'boolean' }, forget: { type: 'string' }, offline: { type: 'boolean' }, chat: { type: 'boolean' } }
     });
-    const memoryFile = resolve('.runtime/vader/memory.json');
+    const dataRoot = resolve(values['data-dir'] || process.env.VADER_DATA_DIR || '.runtime/vader');
+    const memoryFile = join(dataRoot, 'memory.json');
+    let settings = {};
+    try { settings = JSON.parse(await readFile(join(dataRoot, 'settings.json'), 'utf8')); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; }
+    const model = values.model || settings.model;
+    const internet = values.offline ? false : (settings.internet ?? true);
     if (values.help) {
         console.log('vader [--model qwen2.5:3b] [--flow export.json] [--offline] "question"\nvader --chat\nvader --inspect --flow export.json\nvader --remember "fact" | --memories | --forget ID');
     } else if (values.remember) {
@@ -25,7 +31,7 @@ try {
         if (!values.flow) throw new Error('--inspect requires --flow.');
         console.log(JSON.stringify(await loadFlowSummary(values.flow), null, 2));
     } else if (values.chat) {
-        const historyFile = resolve('.runtime/vader/conversation.json');
+        const historyFile = join(dataRoot, 'conversation.json');
         let history = [];
         try { history = JSON.parse(await readFile(historyFile, 'utf8')); } catch (error) { if (error.code !== 'ENOENT') throw error; }
         if (!Array.isArray(history)) throw new Error('Invalid conversation history.');
@@ -37,18 +43,18 @@ try {
                 if (prompt.trim() === '/exit') break;
                 if (!prompt.trim()) continue;
                 try {
-                    const answer = await runVader({ prompt, flowFile: values.flow, model: values.model, memoryFile, internet: !values.offline, history,
+                    const answer = await runVader({ prompt, flowFile: values.flow, model, memoryFile, internet, history,
                         onTool: name => console.error(`[vader tool] ${name}`) });
                     console.log(`vader> ${answer}`);
                     history.push({ role: 'user', content: prompt }, { role: 'assistant', content: answer });
                     history = history.slice(-40);
-                    await mkdir(resolve('.runtime/vader'), { recursive: true });
+                    await mkdir(dataRoot, { recursive: true });
                     await writeFile(historyFile, JSON.stringify(history, null, 2), { mode: 0o600 });
                 } catch (error) { console.error(`vader: ${error.message}`); }
             }
         } finally { terminal.close(); }
     } else {
-        console.log(await runVader({ prompt: positionals.join(' '), flowFile: values.flow, model: values.model, memoryFile, internet: !values.offline,
+        console.log(await runVader({ prompt: positionals.join(' '), flowFile: values.flow, model, memoryFile, internet,
             onTool: name => console.error(`[vader tool] ${name}`) }));
     }
 } catch (error) {

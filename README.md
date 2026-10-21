@@ -109,6 +109,8 @@ node vader/cli.mjs --inspect --flow examples/course-evaluation.json
 
 ## Local data and repository hygiene
 
+For encrypted transfer between machines and a precise account of internet disclosure, see [portability and privacy](docs/PORTABILITY-PRIVACY.md). The desktop Settings page can export/restore the companion; CLI supports `--data-dir` or `VADER_DATA_DIR`. Transferred model weights and runtimes remain separate.
+
 Keep credentials, real device identifiers, recordings, flows containing private configuration, model weights, and personal memories out of Git. `.runtime/`, `.env*`, `models/`, and `node_modules/` are ignored. Review a flow export before sharing it. The supplied examples use no device accounts.
 
 The Jetson remains the intended future always-on host; the laptop is a development/test client. Jetson hardware, software compatibility, deployment, and household integrations remain unverified.

@@ -36,3 +36,9 @@ Personal GUI preference review by the student, full Projects 1–3 rubrics, Jets
 - No Torch/Transformers/PEFT training environment was installed, no parameter-training run was performed, and no trained model was imported. Training hardware/package compatibility and useful quality improvements remain unverified.
 - The CLI remains available without Electron and without any paid API. Jetson execution remains unverified.
 - Native Windows GUI check: opened the portable app, entered a home-automation question through its composer, clicked Send, and verified a generated answer appeared with a saved conversation in the sidebar. Ollama was already running locally for this check.
+
+## Portability addition
+
+- Added encrypted companion export/import and shared data-directory selection for desktop and CLI. Model/runtime files are separate.
+- Transfer test verifies encrypted round trip, missing machine paths, rejection of an incorrect passphrase, destination preservation, and internet tools disabled in restored settings.
+- Suite now has 14 passing tests. New transfer GUI controls have not received a separate interactive walkthrough; transfer functionality was checked through automated tests.

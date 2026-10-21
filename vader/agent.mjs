@@ -1,5 +1,5 @@
 import { readFile, stat } from 'node:fs/promises';
-import { resolve } from 'node:path';
+import { resolve, dirname, join } from 'node:path';
 import { readMemories, remember } from './memory.mjs';
 import { readPublicPage, searchWeb } from './web.mjs';
 
@@ -103,7 +103,9 @@ export async function runVader({ prompt, flowFile, model = 'qwen2.5:3b', chat = 
     }
     // Capability is fixed by the caller, never by a model-supplied path.
     const summary = flowFile ? await loadFlowSummary(flowFile) : null;
-    const personality = await readFile(new URL('./personality.txt', import.meta.url), 'utf8');
+    let personality;
+    try { personality = await readFile(join(dirname(memoryFile), 'personality.txt'), 'utf8'); }
+    catch (error) { if (error.code !== 'ENOENT') throw error; personality = await readFile(new URL('./personality.txt', import.meta.url), 'utf8'); }
     const memories = await readMemories(memoryFile);
     const messages = [{
         role: 'system',

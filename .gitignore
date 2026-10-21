@@ -10,3 +10,4 @@ models/
 __pycache__/
 *.pyc
 dist/
+*.vader

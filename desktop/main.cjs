@@ -5,7 +5,7 @@ const { spawn } = require('node:child_process');
 const { pathToFileURL } = require('node:url');
 let workspace, win, child;
 const root = path.join(__dirname, '..');
-const dataRoot = app.isPackaged ? path.join(app.getPath('userData'), 'vader') : path.join(root, '.runtime', 'vader');
+const dataRoot = process.env.VADER_DATA_DIR ? path.resolve(process.env.VADER_DATA_DIR) : (app.isPackaged ? path.join(app.getPath('userData'), 'vader') : path.join(root, '.runtime', 'vader'));
 async function status() {
     try {
         const response = await fetch('http://127.0.0.1:11434/api/tags', { signal: AbortSignal.timeout(2000) });
@@ -36,10 +36,25 @@ app.on('second-instance', () => { if (win) { if (win.isMinimized()) win.restore(
 app.whenReady().then(async () => {
     const { Workspace } = await import(pathToFileURL(path.join(root, 'vader', 'workspace.mjs')));
     workspace = new Workspace(dataRoot);
+    const transfer = await import(pathToFileURL(path.join(root, 'vader', 'transfer.mjs')));
     const allowed = {
         state: () => workspace.state(), newChat: () => workspace.newChat(), ask: value => workspace.ask(value),
         configure: value => workspace.configure(value), approve: value => workspace.approve(value),
         exportTraining: () => workspace.exportTraining(), forget: id => workspace.removeMemory(id),
+        exportCompanion: async passphrase => {
+            if (workspace.busy) throw Error('Wait for the current answer before exporting.');
+            const selected = await dialog.showSaveDialog(win, { title: 'Export encrypted vader transfer', defaultPath: 'vader.vader', filters: [{ name: 'Encrypted vader transfer', extensions: ['vader'] }] });
+            if (selected.canceled) return { canceled: true };
+            return transfer.exportVader(dataRoot, selected.filePath, passphrase);
+        },
+        importCompanion: async passphrase => {
+            const selected = await dialog.showOpenDialog(win, { title: 'Choose encrypted vader transfer', filters: [{ name: 'Encrypted vader transfer', extensions: ['vader'] }], properties: ['openFile'] });
+            if (selected.canceled) return { canceled: true };
+            const target = await dialog.showOpenDialog(win, { title: 'Choose parent folder for restored vader', properties: ['openDirectory'] });
+            if (target.canceled) return { canceled: true };
+            const destination = path.join(target.filePaths[0], `vader-restored-${Date.now()}`);
+            return transfer.importVader(selected.filePaths[0], destination, passphrase);
+        },
         status, start: startModelServer
     };
     ipcMain.handle('vader', async (event, method, value) => {
