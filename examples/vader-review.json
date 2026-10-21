@@ -1,0 +1,6 @@
+[
+  {"id":"vader-tab","type":"tab","label":"Ask vader"},
+  {"id":"vader-in","type":"http in","z":"vader-tab","name":"POST question","url":"/vader","method":"post","x":150,"y":100,"wires":[["vader-request"]]},
+  {"id":"vader-request","type":"http request","z":"vader-tab","name":"Ask local vader","method":"POST","ret":"obj","url":"http://127.0.0.1:1891/ask","headers":[{"keyType":"other","keyValue":"Content-Type","valueType":"other","valueValue":"application/json"}],"x":380,"y":100,"wires":[["vader-out"]]},
+  {"id":"vader-out","type":"http response","z":"vader-tab","name":"Return answer","x":610,"y":100,"wires":[]}
+]
