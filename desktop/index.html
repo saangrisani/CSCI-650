@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; connect-src 'none'; img-src 'self' data:">
+<title>vader</title><link rel="stylesheet" href="style.css"></head>
+<body><aside><div class="brand"><span class="sigil">v</span><div>vader<small>YOUR LOCAL COMPANION</small></div></div>
+<button id="new" class="new">＋ New conversation</button><div class="label">CONVERSATIONS</div><nav id="chats"></nav>
+<div class="bottom"><button data-view="memories">◇ Memories</button><button data-view="learning">↗ Learning studio</button><button data-view="settings">⚙ Settings</button><div class="local">● Local inference · No API credits</div></div></aside>
+<main><header><div><strong id="heading">vader</strong><small id="subtitle">A little curiosity. A conversation that carries on.</small></div><span id="status">Checking model…</span></header>
+<div id="notice" role="status"></div><section id="content"></section>
+<form id="composer"><textarea id="message" aria-label="Message vader" placeholder="Message vader…" rows="2" maxlength="8000"></textarea><div><span>Enter to send · Shift + Enter for a new line</span><button id="send" type="submit">Send ↑</button></div></form>
+<footer>Private local storage. Internet tools contact the pages they read. AI answers can be mistaken.</footer></main><script src="renderer.js"></script></body></html>

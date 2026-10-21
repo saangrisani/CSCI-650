@@ -27,3 +27,12 @@ Llama 3.2 1B produced unreliable tool formatting. Qwen3 4B also produced unsuita
 ## Not verified
 
 Personal GUI preference review by the student, full Projects 1–3 rubrics, Jetson compatibility/performance, physical device integrations, background service installation, fine-tuning, autonomous continuous research, and household control. No vendor account credentials are used. The downloaded runtime/model files and personal runtime data are not committed.
+
+## Desktop and optional training addition
+
+- Electron 44.9.3 installed and a portable Windows application built using the checked-in packaging script.
+- Automated suite expanded to 13 passing tests, including persistent desktop conversations and export containing only explicitly approved training examples.
+- Optional training/merge scripts passed Python compilation. Dependency-free dataset validation accepted two synthetic examples and reported `training_started: false`.
+- No Torch/Transformers/PEFT training environment was installed, no parameter-training run was performed, and no trained model was imported. Training hardware/package compatibility and useful quality improvements remain unverified.
+- The CLI remains available without Electron and without any paid API. Jetson execution remains unverified.
+- Native Windows GUI check: opened the portable app, entered a home-automation question through its composer, clicked Send, and verified a generated answer appeared with a saved conversation in the sidebar. Ollama was already running locally for this check.

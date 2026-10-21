@@ -8,3 +8,4 @@
 - Preserve existing user work. Keep runtime data, memories, credentials, and model files out of Git.
 - The laptop is for development; the intended always-on household host is the Jetson, whose actual specifications still need inspection.
 - Run `node --test tests/*.test.mjs` for agent changes. Describe mocked tests separately from live model/device checks.
+- Vader now has CLI and Electron desktop interfaces. Optional training scripts create separate candidate adapters; do not describe dataset export as actual weight training. Full training/import and Jetson execution remain unverified.

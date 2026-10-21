@@ -21,6 +21,20 @@ The course repo is not an upstream Node-RED fork. The semester's testing/design 
 - Ollama from https://ollama.com/download for AI conversations.
 - A downloaded local model; default is `qwen2.5:3b` (approximately 1.9 GB download). Actual speed depends on RAM/GPU. Review the model's upstream license.
 
+## Two ways to use vader
+
+**Windows desktop:** a native Electron chat window with conversation sidebar, memories, model settings, and a Learning studio. From source, run `pnpm vader:app` after installing dependencies. If pnpm skips Electron's binary download, run `node node_modules/electron/install.js` once. Build a portable Windows folder with `pnpm vader:build`; launch `Vader.exe` inside the resulting `.runtime/build/Vader` directory. Keep that entire folder together. The portable build includes Electron; Ollama and its local model are separate prerequisites. It is a local development build, not a signed installer.
+
+**Command line on Windows or Jetson/Linux:** `node vader/cli.mjs --chat`. On a headless machine use `pnpm install --prod --frozen-lockfile` to omit Electron. Jetson GPU/runtime compatibility remains to be checked on the actual hardware.
+
+Desktop source runs share `.runtime/vader/memory.json` with the CLI. A portable app uses its per-user app data folder; its memories are separate until deliberately copied or synchronized. Each interface currently has its own conversation history. No automatic cross-computer synchronization is implemented.
+
+The desktop app can start a local Ollama executable through Settings. If Ollama is already running, it uses that server; ensure you started it with cloud disabled. After a fresh install, download the model with `ollama pull qwen2.5:3b`. The desktop app does not automatically download models.
+
+### Retraining
+
+The desktop Learning studio lets you review/correct answers and export approved examples. Optional Python LoRA/QLoRA scripts can train a separate candidate adapter locally, evaluate held-out loss, and merge it for a separately checked import. See [the retraining workflow](docs/RETRAINING.md). This is real parameter-training code, but no full training run or trained candidate import has been verified yet. Ordinary chat uses memory/context and does not silently retrain or switch models.
+
 ```sh
 pnpm install --frozen-lockfile
 pnpm test
