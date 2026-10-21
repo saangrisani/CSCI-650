@@ -4,6 +4,17 @@ import { mkdtemp, rm, readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { Workspace } from '../vader/workspace.mjs';
+test('model settings reject missing models without overwriting a working selection', async()=>{
+    const dir=await mkdtemp(join(tmpdir(),'vader-model-selection-'));
+    try{
+        const workspace=new Workspace(dir,undefined,async()=>['qwen2.5:3b','custom-alias:latest']);
+        await workspace.configure({model:'qwen2.5:3b',internet:false});
+        await assert.rejects(workspace.configure({model:'missing-model',internet:true}),/not installed/);
+        assert.equal((await workspace.state()).settings.model,'qwen2.5:3b');
+        await workspace.configure({model:'custom-alias',internet:false});
+        assert.equal((await workspace.state()).settings.model,'custom-alias');
+    }finally{await rm(dir,{recursive:true});}
+});
 test('desktop conversations persist and only approved examples are exported', async () => {
     const dir=await mkdtemp(join(tmpdir(),'vader-workspace-'));
     try {

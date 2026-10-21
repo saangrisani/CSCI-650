@@ -1,11 +1,11 @@
 import { mkdir, readFile, writeFile, rename } from 'node:fs/promises';
 import { join } from 'node:path';
 import { randomUUID } from 'node:crypto';
-import { runVader, validateModel } from './agent.mjs';
+import { runVader, validateModel, installedModels, hasInstalledModel } from './agent.mjs';
 import { readMemories, forget } from './memory.mjs';
 
 export class Workspace {
-    constructor(root, run = runVader) { this.root = root; this.run = run; this.busy = false; }
+    constructor(root, run = runVader, listModels = installedModels) { this.root = root; this.run = run; this.listModels = listModels; this.busy = false; }
     async read(name, fallback) {
         try { return JSON.parse(await readFile(join(this.root, name), 'utf8')); }
         catch (e) { if (e.code === 'ENOENT') return fallback; throw e; }
@@ -43,6 +43,8 @@ export class Workspace {
     async configure(settings) {
         validateModel(settings.model);
         if (typeof settings.internet !== 'boolean') throw new Error('Internet setting must be a boolean.');
+        const models = await this.listModels();
+        if (!hasInstalledModel(settings.model, models)) throw new Error(`Model "${settings.model}" is not installed. Choose one of: ${models.join(', ') || 'no models installed'}.`);
         await this.write('settings.json', { model: settings.model, internet: settings.internet });
     }
     async removeMemory(id) { await forget(join(this.root, 'memory.json'), id); }

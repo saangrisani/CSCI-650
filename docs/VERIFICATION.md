@@ -53,3 +53,9 @@ Personal GUI preference review by the student, full Projects 1–3 rubrics, Jets
 - A conflicting first Torch environment required a clean isolated environment. The selected clean environment imported Torch 2.11.0+cu128, Transformers 4.57.6, PEFT 0.21.2 and bitsandbytes 0.50.2. CUDA detected the RTX 4060, a small 4-bit CUDA forward check returned shape `(1, 16)`, and `pip check` reported no broken requirements. This is not a full-model training test.
 - No full training job was run on battery. Collection and scheduler checks passed; useful trained-model quality remains unverified.
 - No candidate activation, cumulative live-model improvement, Jetson training, or arbitrary-web dataset support is claimed.
+
+## Model selection fix
+
+- Diagnosed a saved custom model name that did not exist in the active local Ollama model store. Created a local alias of the installed Qwen2.5 3B model and verified a live greeting through that alias. No cloud call or new model-weight download was needed.
+- Desktop settings now list installed models and reject unavailable selections before saving. Implicit `:latest` aliases are supported. A missing model now produces an actionable error rather than only HTTP 404.
+- Added a regression test that a missing model cannot overwrite a working selection. Agent/app suite: 15 passing tests; background worker suite remains 5 tests.

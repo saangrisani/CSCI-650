@@ -6,6 +6,17 @@ import { readPublicPage, searchWeb } from './web.mjs';
 const MAX_FLOW_BYTES = 1_000_000;
 export const OLLAMA_URL = 'http://127.0.0.1:11434';
 
+export async function installedModels() {
+    const response = await fetch(`${OLLAMA_URL}/api/tags`, { signal: AbortSignal.timeout(5000), redirect: 'error' });
+    if (!response.ok) throw new Error('Cannot list local models. Start Ollama before changing the model setting.');
+    const result = await response.json();
+    return (result.models || []).map(item => item.name);
+}
+
+export function hasInstalledModel(name, models) {
+    return models.includes(name) || models.includes(`${name}:latest`);
+}
+
 export function validateModel(model) {
     // Local models only. The Ollama server must also run with OLLAMA_NO_CLOUD=1.
     if (typeof model !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9._:/-]{0,120}$/.test(model)
@@ -62,6 +73,7 @@ export async function ollamaChat(body) {
         signal: AbortSignal.timeout(120_000),
         redirect: 'error'
     });
+    if (response.status === 404) throw new Error(`Local model "${body.model}" was not found. Choose an installed model in Settings or install that model with Ollama.`);
     if (!response.ok) throw new Error(`Local Ollama returned HTTP ${response.status}. Check ollama serve and ollama list.`);
     const result = await response.json();
     if (result.cloud || result.remote_host || /cloud/i.test(result.model || '')) {
