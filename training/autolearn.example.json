@@ -1,0 +1,22 @@
+{
+  "interval_hours": 24,
+  "retry_minutes": 15,
+  "max_steps": 25,
+  "sample_size": 128,
+  "min_free_disk_gb": 20,
+  "min_free_gpu_gb": 5.5,
+  "discover_public_datasets": true,
+  "discovery_limit": 2,
+  "base_model": ".runtime/hf/Qwen2.5-3B-Instruct",
+  "sources": [
+    {
+      "id": "databricks/databricks-dolly-15k",
+      "revision": "bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a",
+      "license": "cc-by-sa-3.0",
+      "url": "https://huggingface.co/datasets/databricks/databricks-dolly-15k/resolve/bdd27f4d94b9c1f951818a7da7fd7aeea5dbff1a/databricks-dolly-15k.jsonl",
+      "prompt_field": "instruction",
+      "context_field": "context",
+      "answer_field": "response"
+    }
+  ]
+}

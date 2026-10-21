@@ -8,6 +8,8 @@ That is not a blanket guarantee that no information ever leaves the computer. Wi
 
 Turn off **Allow internet lookup** and save Settings to disable vader's web tools. CLI `--offline` disables them for that invocation. This controls vader's tools, not the operating system, package manager, or independently running Ollama software. Model/package downloads contact their providers. No application can promise protection against a compromised computer or other software reading local files.
 
+The separately enabled [background learning worker](BACKGROUND-LEARNING.md) downloads public datasets and metadata from Hugging Face independently of the chat internet setting. It does not read private memories/conversations or upload training data. Stop that worker separately if no dataset download activity is wanted.
+
 ## Encrypted companion transfers
 
 Desktop Settings provides **Export companion** and **Restore companion to a new folder**. Choose a passphrase of at least 12 characters. Export produces a `.vader` file encrypted with AES-256-GCM using a scrypt-derived key. Keep the passphrase separately; there is no password recovery. Export files are ignored by Git.

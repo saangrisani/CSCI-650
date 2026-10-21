@@ -74,13 +74,15 @@ def main():
         prefix_len = len(tokenizer(prefix, add_special_tokens=False)["input_ids"])
         labels = [-100] * min(prefix_len, len(ids)) + ids[prefix_len:]
         if all(x == -100 for x in labels):
-            raise ValueError("An example's prompt exceeds the training context; shorten it")
+            return None
         padding = 512 - len(ids)
         return {"input_ids": torch.tensor(ids + [tokenizer.pad_token_id] * padding),
                 "attention_mask": torch.tensor([1] * len(ids) + [0] * padding),
                 "labels": torch.tensor(labels + [-100] * padding)}
 
-    encoded = [encode(x) for x in examples]
+    encoded = [encoded for item in examples if (encoded := encode(item)) is not None]
+    if len(encoded) < 2:
+        raise ValueError("Too few examples fit the training context after tokenization")
     holdout = max(1, len(encoded) // 5)
     trainer = Trainer(model=model, args=TrainingArguments(output_dir=str(output),
         max_steps=args.steps, per_device_train_batch_size=1, per_device_eval_batch_size=1,
@@ -93,7 +95,7 @@ def main():
     model.save_pretrained(output)
     tokenizer.save_pretrained(output)
     (output / "evaluation.json").write_text(json.dumps({"before": before, "after": after,
-        "examples": len(examples), "steps": args.steps, "base": str(Path(args.base).resolve()),
+        "examples": len(encoded), "discarded_overlong_prompts": len(examples)-len(encoded), "steps": args.steps, "base": str(Path(args.base).resolve()),
         "activated": False}, indent=2), encoding="utf-8")
     print(f"Candidate adapter saved to {output}. Original Ollama model unchanged.")
 

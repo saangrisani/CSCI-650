@@ -55,6 +55,11 @@ app.whenReady().then(async () => {
             const destination = path.join(target.filePaths[0], `vader-restored-${Date.now()}`);
             return transfer.importVader(selected.filePaths[0], destination, passphrase);
         },
+        learningStatus: async () => {
+            const backend = await workspace.read('backend.json', {});
+            try { return JSON.parse(await fs.readFile(path.join(backend.learningFolder || path.join(root, '.runtime', 'autolearn'), 'status.json'), 'utf8')); }
+            catch (error) { if (error.code === 'ENOENT') return { state: 'not_started' }; throw error; }
+        },
         status, start: startModelServer
     };
     ipcMain.handle('vader', async (event, method, value) => {

@@ -42,3 +42,14 @@ Personal GUI preference review by the student, full Projects 1–3 rubrics, Jets
 - Added encrypted companion export/import and shared data-directory selection for desktop and CLI. Model/runtime files are separate.
 - Transfer test verifies encrypted round trip, missing machine paths, rejection of an incorrect passphrase, destination preservation, and internet tools disabled in restored settings.
 - Suite now has 14 passing tests. New transfer GUI controls have not received a separate interactive walkthrough; transfer functionality was checked through automated tests.
+
+## Background public-dataset worker
+
+- Live collection fetched the pinned Dolly dataset, recorded SHA-256 `2df9083338b4abd6bceb5635764dab5d833b393b55759dffb0959b6fcbf794ec`, and found 13,543 rows meeting the normalization limits. A reproducible 128-example sample was written locally.
+- Live public-source discovery found another JSONL instruction source; its download exceeded the 32 MB budget and was skipped without blocking the configured source. Oversized revisions are marked to avoid repeated oversized downloads.
+- Five Python worker tests pass, covering filtering/deduplication, finite/improving evaluation checks, collection-only behavior, prerequisite waiting, and battery-power deferral. The 14 existing agent/app tests also pass (19 total).
+- Downloaded pinned original Qwen2.5 3B Instruct Safetensors/tokenizer files to the ignored local training directory; the downloader checked available large-file hashes.
+- Installed a per-user Windows login startup shortcut and started the background worker independently of the chat app. Its PID was checked live and status reported `waiting` / `Waiting for AC power`; no training job has started on battery.
+- A conflicting first Torch environment required a clean isolated environment. The selected clean environment imported Torch 2.11.0+cu128, Transformers 4.57.6, PEFT 0.21.2 and bitsandbytes 0.50.2. CUDA detected the RTX 4060, a small 4-bit CUDA forward check returned shape `(1, 16)`, and `pip check` reported no broken requirements. This is not a full-model training test.
+- No full training job was run on battery. Collection and scheduler checks passed; useful trained-model quality remains unverified.
+- No candidate activation, cumulative live-model improvement, Jetson training, or arbitrary-web dataset support is claimed.

@@ -40,6 +40,8 @@ I want vader to remember useful details and preferences so conversations can car
 
 Memory and retraining are different parts of the project. The optional LoRA/QLoRA scripts create a separate candidate model adapter; I haven't completed a full training run or tested an imported trained model yet.
 
+I've also added a [background learning worker](docs/BACKGROUND-LEARNING.md) to find compatible public datasets, collect examples, and run candidate-training jobs on my local GPU when resources are available. It keeps those datasets separate from my private conversations. The worker runs independently of the chat window; candidate activation is still a separate step.
+
 ## Moving it and keeping my information private
 
 I can export an encrypted companion file from Settings and restore it on another machine. That carries the memories, conversations, settings, personality, and approved examples. The model and runtime files move separately. A restored copy starts with internet lookup off.

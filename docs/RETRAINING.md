@@ -39,6 +39,6 @@ python training/merge_adapter.py --base PATH/local-hf-base --adapter .runtime/tr
 
 Ollama supports importing supported Safetensors architectures with a Modelfile whose `FROM` points to the merged directory. Template/tool-call compatibility must be checked for the exact imported architecture and Ollama version. Use a new local model name such as `vader-candidate-001`; do not replace `qwen2.5:3b`. If direct import is unsupported, model-specific conversion is additional work. No candidate import has been verified here.
 
-Select the candidate in the desktop settings or with CLI `--model vader-candidate-001`. Roll back by selecting `qwen2.5:3b` again. Changing a model does not erase memories. There is no background self-retraining scheduler in this version.
+Select the candidate in the desktop settings or with CLI `--model vader-candidate-001`. Roll back by selecting `qwen2.5:3b` again. Changing a model does not erase memories. A separate [background worker](BACKGROUND-LEARNING.md) can collect public datasets and train candidate adapters automatically; it does not auto-promote them into the running chat model.
 
 References: https://huggingface.co/docs/peft/developer_guides/quantization and https://docs.ollama.com/import
